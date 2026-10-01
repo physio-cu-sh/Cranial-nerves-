@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Cranial Nerves Speed Quiz (50 Questions - Shuffled)</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary: #ec4899;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #22c55e;
+            --error: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #334155;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            color: #818cf8;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+
+        /* Timer Bar */
+        .timer-container {
+            width: 100%;
+            height: 8px;
+            background-color: #334155;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .timer-bar {
+            width: 100%;
+            height: 100%;
+            background-color: var(--secondary);
+            transition: width 0.05s linear;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-weight: bold;
+            color: var(--text-muted);
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.4;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
+        .option-btn {
+            background-color: #334155;
+            color: var(--text-color);
+            border: 2px solid transparent;
+            padding: 0.9rem;
+            font-size: 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .option-btn:hover {
+            background-color: #475569;
+            border-color: var(--primary);
+        }
+
+        .option-btn.correct {
+            background-color: rgba(34, 197, 94, 0.2);
+            border-color: var(--success);
+            color: #4ade80;
+        }
+
+        .option-btn.wrong {
+            background-color: rgba(239, 68, 68, 0.2);
+            border-color: var(--error);
+            color: #f87171;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .stats-box {
+            display: flex;
+            justify-content: space-around;
+            margin: 1.5rem 0;
+            background-color: #0f172a;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .stat-item span {
+            display: block;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #818cf8;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="card">
+            <!-- Start Screen -->
+            <div id="start-screen">
+                <h1>⚡ Ultimate Cranial Nerves Speed Quiz</h1>
+                <p class="subtitle">50 Shuffled Questions Challenge!<br>You have <b>10 seconds</b> per question.</p>
+                <button class="btn" id="start-btn">Start Challenge</button>
+            </div>
+
+            <!-- Quiz Screen -->
+            <div id="quiz-screen" class="hidden">
+                <div class="quiz-header">
+                    <span id="question-counter">Question 1 of 50</span>
+                    <span id="score-display">Score: 0</span>
+                </div>
+                <div class="timer-container">
+                    <div class="timer-bar" id="timer-bar"></div>
+                </div>
+                <div class="question-text" id="question-text">Question text here?</div>
+                <div class="options-grid" id="options-container">
+                    <!-- Options injected dynamically -->
+                </div>
+            </div>
+
+            <!-- Result Screen -->
+            <div id="result-screen" class="hidden">
+                <h1>Quiz Completed! 🏆</h1>
+                <p class="subtitle">Here is your ultimate speed performance summary:</p>
+                <div class="stats-box">
+                    <div class="stat-item">
+                        <span class="stat-value" id="final-score">0</span>
+                        <span class="stat-label">Final Score</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="correct-count">0</span>
+                        <span class="stat-label">Correct Answers</span>
+                    </div>
+                </div>
+                <button class="btn" id="restart-btn">Try Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const rawQuestions = [
+            { q: "What is the name of Cranial Nerve I?", options: ["Optic", "Olfactory", "Oculomotor", "Trochlear"], answerText: "Olfactory" },
+            { q: "What is the Roman numeral for the Olfactory nerve?", options: ["I", "II", "III", "IV"], answerText: "I" },
+            { q: "What is the type of Cranial Nerve I (Olfactory)?", options: ["Motor", "Sensory", "Both", "Autonomic"], answerText: "Sensory" },
+            { q: "What is the function of Cranial Nerve I (Olfactory)?", options: ["Sight", "Smell", "Hearing", "Taste"], answerText: "Smell" },
+            
+            { q: "What is the name of Cranial Nerve II?", options: ["Optic", "Olfactory", "Oculomotor", "Trochlear"], answerText: "Optic" },
+            { q: "What is the Roman numeral for the Optic nerve?", options: ["I", "II", "III", "IV"], answerText: "II" },
+            { q: "What is the type of Cranial Nerve II (Optic)?", options: ["Sensory", "Motor", "Both", "None"], answerText: "Sensory" },
+            { q: "What is the function of Cranial Nerve II (Optic)?", options: ["Sight", "Smell", "Eye movement", "Hearing"], answerText: "Sight" },
+
+            { q: "What is the name of Cranial Nerve III?", options: ["Trochlear", "Abducens", "Oculomotor", "Optic"], answerText: "Oculomotor" },
+            { q: "What is the Roman numeral for the Oculomotor nerve?", options: ["II", "III", "IV", "V"], answerText: "III" },
+            { q: "What is the type of Cranial Nerve III (Oculomotor)?", options: ["Sensory", "Motor", "Both", "Parasympathetic only"], answerText: "Motor" },
+            { q: "What is the function of Cranial Nerve III (Oculomotor)?", options: ["Smell", "Eye movement", "Facial sensation", "Chewing"], answerText: "Eye movement" },
+
+            { q: "What is the name of Cranial Nerve IV?", options: ["Trochlear", "Abducens", "Trigeminal", "Facial"], answerText: "Trochlear" },
+            { q: "What is the Roman numeral for the Trochlear nerve?", options: ["III", "IV", "V", "VI"], answerText: "IV" },
+            { q: "What is the type of Cranial Nerve IV (Trochlear)?", options: ["Sensory", "Motor", "Both", "Autonomic"], answerText: "Motor" },
+            { q: "What is the function of Cranial Nerve IV (Trochlear)?", options: ["Eye movement", "Hearing & Balance", "Taste", "Swallowing"], answerText: "Eye movement" },
+
+            { q: "What is the name of Cranial Nerve V?", options: ["Trochlear", "Trigeminal", "Abducens", "Facial"], answerText: "Trigeminal" },
+            { q: "What is the Roman numeral for the Trigeminal nerve?", options: ["IV", "V", "VI", "VII"], answerText: "V" },
+            { q: "What is the type of Cranial Nerve V (Trigeminal)?", options: ["Sensory", "Motor", "Both", "None"], answerText: "Both" },
+            { q: "What are the functions of Cranial Nerve V (Trigeminal)?", options: ["Smell & Taste", "Face sensation & Chewing", "Eye movement", "Hearing & Balance"], answerText: "Face sensation & Chewing" },
+
+            { q: "What is the name of Cranial Nerve VI?", options: ["Facial", "Vagus", "Abducens", "Accessory"], answerText: "Abducens" },
+            { q: "What is the Roman numeral for the Abducens nerve?", options: ["V", "VI", "VII", "VIII"], answerText: "VI" },
+            { q: "What is the type of Cranial Nerve VI (Abducens)?", options: ["Motor", "Sensory", "Both", "Autonomic"], answerText: "Motor" },
+            { q: "What is the function of Cranial Nerve VI (Abducens)?", options: ["Eye movement", "Smell", "Sight", "Hearing"], answerText: "Eye movement" },
+
+            { q: "What is the name of Cranial Nerve VII?", options: ["Trigeminal", "Facial", "Vestibulocochlear", "Glossopharyngeal"], answerText: "Facial" },
+            { q: "What is the Roman numeral for the Facial nerve?", options: ["VI", "VII", "VIII", "IX"], answerText: "VII" },
+            { q: "What is the type of Cranial Nerve VII (Facial)?", options: ["Sensory", "Motor", "Both", "None"], answerText: "Both" },
+            { q: "What is the function of Cranial Nerve VII (Facial)?", options: ["Shoulder shrugging", "Taste buds, tears, saliva, smiling", "Heart rate & Digestion", "Smell"], answerText: "Taste buds, tears, saliva, smiling" },
+
+            { q: "What is the name of Cranial Nerve VIII?", options: ["Glossopharyngeal", "Vagus", "Vestibulocochlear", "Hypoglossal"], answerText: "Vestibulocochlear" },
+            { q: "What is the Roman numeral for the Vestibulocochlear nerve?", options: ["VII", "VIII", "IX", "X"], answerText: "VIII" },
+            { q: "What is the type of Cranial Nerve VIII (Vestibulocochlear)?", options: ["Sensory", "Motor", "Both", "Autonomic"], answerText: "Sensory" },
+            { q: "What is the function of Cranial Nerve VIII (Vestibulocochlear)?", options: ["Hearing & Balance", "Vision", "Chewing", "Facial expression"], answerText: "Hearing & Balance" },
+
+            { q: "What is the name of Cranial Nerve IX?", options: ["Vagus", "Glossopharyngeal", "Accessory", "Hypoglossal"], answerText: "Glossopharyngeal" },
+            { q: "What is the Roman numeral for the Glossopharyngeal nerve?", options: ["VIII", "IX", "X", "XI"], answerText: "IX" },
+            { q: "What is the type of Cranial Nerve IX (Glossopharyngeal)?", options: ["Sensory", "Motor", "Both", "None"], answerText: "Both" },
+            { q: "What is the function of Cranial Nerve IX (Glossopharyngeal)?", options: ["Taste & Swallowing", "Smell", "Eye movement", "Facial expressions"], answerText: "Taste & Swallowing" },
+
+            { q: "What is the name of Cranial Nerve X?", options: ["Accessory", "Hypoglossal", "Vagus", "Facial"], answerText: "Vagus" },
+            { q: "What is the Roman numeral for the Vagus nerve?", options: ["IX", "X", "XI", "XII"], answerText: "X" },
+            { q: "What is the type of Cranial Nerve X (Vagus)?", options: ["Sensory", "Motor", "Both", "Autonomic only"], answerText: "Both" },
+            { q: "What is the function of Cranial Nerve X (Vagus)?", options: ["Heart rate & Digestion", "Shoulder shrugging", "Tongue movement", "Smell"], answerText: "Heart rate & Digestion" },
+
+            { q: "What is the name of Cranial Nerve XI?", options: ["Hypoglossal", "Accessory", "Vagus", "Trochlear"], answerText: "Accessory" },
+            { q: "What is the Roman numeral for the Accessory nerve?", options: ["X", "XI", "XII", "IX"], answerText: "XI" },
+            { q: "What is the type of Cranial Nerve XI (Accessory)?", options: ["Sensory", "Motor", "Both", "None"], answerText: "Motor" },
+            { q: "What is the function of Cranial Nerve XI (Accessory)?", options: ["Shoulder shrugging", "Eye movement", "Hearing", "Taste"], answerText: "Shoulder shrugging" },
+
+            { q: "What is the name of Cranial Nerve XII?", options: ["Accessory", "Hypoglossal", "Vagus", "Optic"], answerText: "Hypoglossal" },
+            { q: "What is the Roman numeral for the Hypoglossal nerve?", options: ["X", "XI", "XII", "VIII"], answerText: "XII" },
+            { q: "What is the type of Cranial Nerve XII (Hypoglossal)?", options: ["Sensory", "Motor", "Both", "Autonomic"], answerText: "Motor" },
+            { q: "What is the function of Cranial Nerve XII (Hypoglossal)?", options: ["Tongue movement", "Face sensation", "Saliva production", "Balance"], answerText: "Tongue movement" },
+
+            // Extra expansion to reach 50 unique diverse questions
+            { q: "Which cranial nerve is purely sensory for smell?", options: ["Optic", "Olfactory", "Facial", "Trigeminal"], answerText: "Olfactory" },
+            { q: "Which cranial nerve is responsible for vision?", options: ["Olfactory", "Optic", "Oculomotor", "Trochlear"], answerText: "Optic" },
+            { q: "Which cranial nerve controls chewing and facial sensation?", options: ["Facial", "Trigeminal", "Hypoglossal", "Vagus"], answerText: "Trigeminal" },
+            { q: "Which cranial nerve controls smiling, tears, and saliva?", options: ["Facial", "Glossopharyngeal", "Vagus", "Trigeminal"], answerText: "Facial" },
+            { q: "Which cranial nerve controls heart rate and digestion?", options: ["Glossopharyngeal", "Accessory", "Vagus", "Abducens"], answerText: "Vagus" },
+            { q: "Which cranial nerve controls shoulder shrugging?", options: ["Hypoglossal", "Accessory", "Vagus", "Trochlear"], answerText: "Accessory" },
+            { q: "Which cranial nerve controls tongue movement?", options: ["Glossopharyngeal", "Hypoglossal", "Facial", "Trigeminal"], answerText: "Hypoglossal" },
+            { q: "How many pairs of cranial nerves are there in the human body?", options: ["10 pairs", "12 pairs", "24 pairs", "31 pairs"], answerText: "12 pairs" },
+            { q: "Which of the following is a purely motor nerve affecting the superior oblique muscle?", options: ["Trochlear", "Optic", "Olfactory", "Vestibulocochlear"], answerText: "Trochlear" },
+            { q: "Which nerve innervates the lateral rectus muscle of the eye?", options: ["Abducens", "Oculomotor", "Trochlear", "Optic"], answerText: "Abducens" },
+            { q: "Which nerve is responsible for hearing and equilibrium?", options: ["Vestibulocochlear", "Facial", "Vagus", "Glossopharyngeal"], answerText: "Vestibulocochlear" },
+            { q: "Which nerve handles posterior taste and swallowing?", options: ["Glossopharyngeal", "Hypoglossal", "Accessory", "Olfactory"], answerText: "Glossopharyngeal" }
+        ];
+
+        // Function to shuffle array (Fisher-Yates) and options
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                let j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        let questions = [];
+
+        function prepareQuestions() {
+            // Shuffle raw questions and pick 50
+            let shuffledRaw = shuffle([...rawQuestions]).slice(0, 50);
+            
+            questions = shuffledRaw.map(item => {
+                let optionsCopy = [...item.options];
+                shuffle(optionsCopy);
+                let newAnswerIndex = optionsCopy.indexOf(item.answerText);
+                return {
+                    q: item.q,
+                    options: optionsCopy,
+                    answer: newAnswerIndex
+                };
+            });
+        }
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let correctAnswersCount = 0;
+        let timeLimit = 10000; // 10 seconds
+        let timerInterval;
+        let answered = false;
+
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const questionCounter = document.getElementById('question-counter');
+        const scoreDisplay = document.getElementById('score-display');
+        const timerBar = document.getElementById('timer-bar');
+        const finalScore = document.getElementById('final-score');
+        const correctCount = document.getElementById('correct-count');
+
+        startBtn.addEventListener('click', startQuiz);
+        restartBtn.addEventListener('click', startQuiz);
+
+        function startQuiz() {
+            prepareQuestions();
+            startScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            currentQuestionIndex = 0;
+            score = 0;
+            correctAnswersCount = 0;
+            scoreDisplay.textContent = `Score: ${score}`;
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                endQuiz();
+                return;
+            }
+
+            answered = false;
+            const q = questions[currentQuestionIndex];
+            questionText.textContent = q.q;
+            questionCounter.textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+            
+            optionsContainer.innerHTML = '';
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt;
+                btn.addEventListener('click', () => selectOption(index));
+                optionsContainer.appendChild(btn);
+            });
+
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            let startTime = Date.now();
+            timerBar.style.width = '100%';
+
+            timerInterval = setInterval(() => {
+                let elapsed = Date.now() - startTime;
+                let remaining = timeLimit - elapsed;
+                let percentage = (remaining / timeLimit) * 100;
+
+                if (percentage >= 0) {
+                    timerBar.style.width = percentage + '%';
+                }
+
+                if (remaining <= 0) {
+                    clearInterval(timerInterval);
+                    if (!answered) {
+                        handleTimeOut();
+                    }
+                }
+            }, 50);
+        }
+
+        function selectOption(selectedIndex) {
+            if (answered) return;
+            answered = true;
+            clearInterval(timerInterval);
+
+            const q = questions[currentQuestionIndex];
+            const buttons = optionsContainer.children;
+
+            if (selectedIndex === q.answer) {
+                buttons[selectedIndex].classList.add('correct');
+                score += 10;
+                correctAnswersCount++;
+                scoreDisplay.textContent = `Score: ${score}`;
+            } else {
+                buttons[selectedIndex].classList.add('wrong');
+                buttons[q.answer].classList.add('correct');
+            }
+
+            setTimeout(nextQuestion, 1000);
+        }
+
+        function handleTimeOut() {
+            answered = true;
+            const q = questions[currentQuestionIndex];
+            const buttons = optionsContainer.children;
+            buttons[q.answer].classList.add('correct');
+
+            setTimeout(nextQuestion, 1000);
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            loadQuestion();
+        }
+
+        function endQuiz() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            finalScore.textContent = score;
+            correctCount.textContent = `${correctAnswersCount} of ${questions.length}`;
+        }
+    </script>
+</body>
+</html>
